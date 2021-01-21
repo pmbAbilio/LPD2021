@@ -1,5 +1,5 @@
 from portscanner.main import PortScanner
-
+from securechat.main import SecureChat
 '''
 options ={
   "Exit": "Exits the program",
@@ -23,25 +23,24 @@ class menu():
             print("{} --- {}".format(index, opt))
     
     def awaitInput(self):
-        while True:
-            try:
-                inpt = int(input("Please select a suitable option: "))
-            except ValueError:
-                print("The inserted value is not an acceptable input please select one of the options above")
-                self.awaitInput()
-                break
-            except:
-                print("Something went wrong \nLeaving...")
-                break
+        try:
+            inpt = int(input("Please select a suitable option: "))
+        except ValueError:
+            print("The inserted value is not an acceptable input please select one of the options above")
+            self.awaitInput()
+        except:
+            print("Something went wrong \nLeaving...")
 
-            if int(inpt) == 0:
-                print("Leaving...")
-                break
+        if int(inpt) == 0:
+            print("Leaving...")
 
-            elif inpt == 1:
-                print("Port Scan...")
-                ip = input("Remote System IP: ")
-                scanner = PortScanner(ip) 
+        elif inpt == 1:
+            print("Port Scan...")
+            ip = input("Remote System IP: ")
+            scanner = PortScanner(ip) 
+        elif inpt == 3:
+            print("Openning chat application...")
+            chat = SecureChat()
 
 
 
