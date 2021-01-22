@@ -1,7 +1,7 @@
 import socket
 import select
 import errno
-
+from securechat.crypto_utils import crypto_utils
 
 class client():
 
@@ -10,7 +10,7 @@ class client():
     PORT = 1234
     my_username = "client"
 
-    def __init__(self, serverIP, serverPORT):
+    def __init__(self, serverIP="127.0.0.1", serverPORT=1234):
         self.IP = serverIP
         self.PORT = serverPORT
         self.my_username = input("Username: ")
@@ -25,11 +25,14 @@ class client():
         # Set connection to non-blocking state, so .recv() call won;t block, just return some exception we'll handle
         client_socket.setblocking(False)
 
+        pub_key = crypto_utils().generateKeyPair()
+
         # Prepare username and header and send them
         # We need to encode username to bytes, then count number of bytes and prepare header of fixed size, that we encode to bytes as well
         username = self.my_username.encode('utf-8')
-        username_header = f"{len(username):<{self.HEADER_LENGTH}}".encode('utf-8')
-        client_socket.send(username_header + username)
+        username_header = f"{len(pub_key):<{self.HEADER_LENGTH}}".encode('utf-8')
+        print(username_header + username)
+        client_socket.send(username_header + pub_key)
 
         while True:
 
