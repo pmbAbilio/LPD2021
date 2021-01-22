@@ -2,8 +2,10 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 
 class crypto_utils():
-    
-    def __init__(self)
+    pub_key = ""
+
+    def __init__(self, pubkey)
+        self.pub_key = pubkey
 
     def generateKeyPair(self):
         random_generator = Random.new().read
@@ -19,13 +21,14 @@ class crypto_utils():
         privkey = open("keys/key.priv",'a')
         privkey.write(str(private_key))
         privkey.close()
+        
     def encrypt_message(self, message):
-
-        encripted_message = public_key.encrypt('Texto Importante', 32)
+        encripted_message = pub_key.encrypt('Texto Importante', 32)
         return encripted_message
-    #Encriptar com chave publica
-    #
-    #print encriptado_data
-    #Desencriptar com chave privada
-    #original_data = key.decrypt(encriptado_data)
-    #print original_data
+    
+    def decrypt_message(self):
+        key = open("keys/key.priv", "r")
+        decripted_message = key.decrypt(encriptado_data)
+        return decripted_message
+    
+    
