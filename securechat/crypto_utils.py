@@ -23,8 +23,7 @@ class crypto_utils():
         encripted_message = key.encrypt(message, 32)
         return encripted_message
     
-    def decrypt_message(self):
-        key = open("keys/key.priv", "r")
+    def decrypt_message(self, message, key):
         decripted_message = key.decrypt(encriptado_data)
         return decripted_message
     

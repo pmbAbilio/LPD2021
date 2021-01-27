@@ -24,7 +24,10 @@ class server():
             message_length = int(message_header.decode('utf-8').strip())
 
             # Return an object of message header and message data
-            return {'header': message_header, 'data': client_socket.recv(message_length)}
+            if client_socket not in self.clients:
+                return {'header': message_header, 'key': client_socket.recv(message_length)}
+            else:
+                return {'header': message_header, 'data': client_socket.recv(message_length)}
 
         except:
 
@@ -73,47 +76,49 @@ class server():
                 # This is a blocking call, code execution will "wait" here and "get" notified in case any action should be taken
                 read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
 
-
                 # Iterate over notified sockets
                 for notified_socket in read_sockets:
 
                     # If notified socket is a server socket - new connection, accept it
-                    if notified_socket == server_socket:
 
+                    if notified_socket == server_socket:
                         # Accept new connection
                         # That gives us new socket - client socket, connected to this given client only, it's unique for that client
                         # The other returned object is ip/port set
+                        
                         client_socket, client_address = server_socket.accept()
+                        
+                        if len(self.clients) + 1 <= 2:
+                            # Client should send his name right away, receive it
+                            user = self.receive_message(client_socket)
 
-                        # Client should send his name right away, receive it
-                        user = self.receive_message(client_socket)
+                            if user is False:
+                                continue
 
-                        # If False - client disconnected before he sent his name
-                        if user is False:
-                            continue
+                            # Add accepted socket to select.select() list
+                            sockets_list.append(client_socket)
 
-                        # Add accepted socket to select.select() list
-                        sockets_list.append(client_socket)
+                            user['username'] = 'user'+str(len(self.clients))
+                            self.clients[client_socket] = user
+                            self.notify_all(client_socket, self.clients)
 
-                        # Also save username and username header
-                        user['username'] = 'user'+str(len(self.clients))
-                        user['key'] = user['data']
-                        user['data'] = ''
-                        self.clients[client_socket] = user
-
-                        #print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
-                        print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['username']))
+                            #print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['data'].decode('utf-8')))
+                            print('Accepted new connection from {}:{}, username: {}'.format(*client_address, user['username']))
+                        else:
+                            message = f"Not allowed to connect, too many users already".encode('utf-8')
+                            message_header = f"{len(message):<{10}}".encode('utf-8')
+                            client_socket.send(message_header + message)
+                            client_socket.close()
 
                     # Else existing socket is sending a message
                     else:
-
                         # Receive message
                         message = self.receive_message(notified_socket)
-                        #print(self.clients[notified_socket])
+
                         # If False, client disconnected, cleanup
                         if message is False:
-                            print('Closed connection from: {}'.format(self.clients[notified_socket]['username'].decode('utf-8')))
-
+                            print('Closed connection from: {}'.format(self.clients[notified_socket]['username']))
+                            #.decode('utf-8')
                             # Remove from list for socket.socket()
                             sockets_list.remove(notified_socket)
 
@@ -131,11 +136,11 @@ class server():
                         for client_socket in self.clients:
 
                             # But don't sent it to sender
+                            
                             if client_socket != notified_socket:
-
-                                # Send user and message (both with their headers)
-                                # We are reusing here message header sent by sender, and saved username header send by user when he connected
-                                client_socket.send(user['header'] + user['username'].encode("utf-8") + message['header'] + message['data'])
+                                print("sending: " + message['data'].decode("utf-8") + " to " + self.clients[client_socket]['username'])
+                                # Send header and message
+                                client_socket.send(message['header'] + message['data'])
 
                 # It's not really necessary to have this, but will handle some socket exceptions just in case
                 for notified_socket in exception_sockets:
@@ -145,4 +150,10 @@ class server():
 
                     # Remove from our list of users
                     del self.clients[notified_socket]
-    
+
+    def notify_all(self, sender, clients):
+        for client_socket in clients:
+            if clients[client_socket] != clients[sender]:
+                print("Sending Key!!")
+                sender.send(clients[client_socket]['header'] + clients[client_socket]['key'])
+                client_socket.send(clients[sender]['header'] + clients[sender]['key'])

@@ -1,6 +1,7 @@
 import socket
 import select
 import errno
+import sys
 from securechat.crypto_utils import crypto_utils
 
 class client():
@@ -8,12 +9,12 @@ class client():
     HEADER_LENGTH = 10
     IP = "127.0.0.1"
     PORT = 1234
-    my_username = "client"
+    own_message = True
+    DST_KEY = b""
 
     def __init__(self, serverIP="127.0.0.1", serverPORT=1234):
         self.IP = serverIP
         self.PORT = serverPORT
-        self.my_username = input("Username: ")
         # Create a socket
         # socket.AF_INET - address family, IPv4, some otehr possible are AF_INET6, AF_BLUETOOTH, AF_UNIX
         # socket.SOCK_STREAM - TCP, conection-based, socket.SOCK_DGRAM - UDP, connectionless, datagrams, socket.SOCK_RAW - raw IP packets
@@ -29,15 +30,14 @@ class client():
 
         # Prepare username and header and send them
         # We need to encode username to bytes, then count number of bytes and prepare header of fixed size, that we encode to bytes as well
-        username = self.my_username.encode('utf-8')
-        username_header = f"{len(pub_key):<{self.HEADER_LENGTH}}".encode('utf-8')
-        print(username_header + username)
-        client_socket.send(username_header + pub_key)
+        
+        key_header = f"{len(pub_key):<{self.HEADER_LENGTH}}".encode('utf-8')
+        client_socket.send(key_header + pub_key)
 
         while True:
 
             # Wait for user to input a message
-            message = input(f'{self.my_username} > ')
+            message = input(f'You: ')
 
             # If message is not empty - send it
             if message:
@@ -47,31 +47,28 @@ class client():
                 message_header = f"{len(message):<{self.HEADER_LENGTH}}".encode('utf-8')
                 client_socket.send(message_header + message)
 
+                
             try:
                 # Now we want to loop over received messages (there might be more than one) and print them
+                
                 while True:
-
-                    # Receive our "header" containing username length, it's size is defined and constant
-                    username_header = client_socket.recv(self.HEADER_LENGTH)
-
                     # If we received no data, server gracefully closed a connection, for example using socket.close() or socket.shutdown(socket.SHUT_RDWR)
-                    if not len(username_header):
-                        print('Connection closed by the server')
-                        sys.exit()
-
-                    # Convert header to int value
-                    username_length = int(username_header.decode('utf-8').strip())
-
-                    # Receive and decode username
-                    username = client_socket.recv(username_length).decode('utf-8')
-
+                    
                     # Now do the same for message (as we received username, we received whole message, there's no need to check if it has any length)
                     message_header = client_socket.recv(self.HEADER_LENGTH)
+                    if not len(message_header):
+                        print('Connection closed by the server')
+                        sys.exit()
                     message_length = int(message_header.decode('utf-8').strip())
-                    message = client_socket.recv(message_length).decode('utf-8')
+                    message = client_socket.recv(message_length)
 
+                    if 'PUBLIC KEY' in message.decode('utf-8'):
+                        DST_KEY = message
+                        print("received public key:" + message.decode('utf-8'))
+                    else:
                     # Print message
-                    print(f'{username} > {message}')
+                        message = message.decode('utf-8')
+                        print(f'Answer: {message}')
 
             except IOError as e:
                 # This is normal on non blocking connections - when there are no incoming data error is going to be raised
