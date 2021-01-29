@@ -130,7 +130,7 @@ class server():
                         # Get user by notified socket, so we will know who sent the message
                         user = self.clients[notified_socket]
                         #print(user['key'])
-                        print(f'Received message from {user["username"]}: {message["data"].decode("utf-8")}')
+                        #print(f'Received message from {user["username"]}: {message["data"].decode("utf-8")}')
 
                         # Iterate over connected self.clients and broadcast message
                         for client_socket in self.clients:
@@ -138,7 +138,7 @@ class server():
                             # But don't sent it to sender
                             
                             if client_socket != notified_socket:
-                                print("sending: " + message['data'].decode("utf-8") + " to " + self.clients[client_socket]['username'])
+                                #print("sending: " + message['data'].decode("utf-8") + " to " + self.clients[client_socket]['username'])
                                 # Send header and message
                                 client_socket.send(message['header'] + message['data'])
 

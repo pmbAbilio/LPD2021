@@ -1,8 +1,8 @@
 1 - Server must share keys with both clients - Done
   |
-   -> Must limit to two connections only 
+   -> Must limit to two connections only - Done
 
-2 - Messages must be encripted with clients private key by themselves 
+2 - Messages must be encripted with clients private key by themselves - DONE
 3 - Must parse log data
 4 - Log data must be runned trough GeoIP
 5 - Must generate PDF file whit log data
