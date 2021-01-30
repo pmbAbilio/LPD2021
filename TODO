@@ -3,7 +3,7 @@
    -> Must limit to two connections only - Done
 
 2 - Messages must be encripted with clients private key by themselves - DONE
-3 - Must parse log data
+3 - Must parse log data - DONE (Gets ips and timestamps from ssh logs)
 4 - Log data must be runned trough GeoIP
 5 - Must generate PDF file whit log data
 6 - PDF must encripted with simetric key set by user

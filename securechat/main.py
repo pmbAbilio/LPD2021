@@ -25,9 +25,9 @@ class SecureChat():
     def startServer(self):
         connected_server = server()
     def startClient(self):
-        server_ip = input("Please insert server IP: ")
+        server_ip = input("Please insert server IP(127.0.0.1): ")
         try:
-            server_port = int(input("Please inser server port: "))
+            server_port = int(input("Please insert server port: "))
         except ValueError:
             print("It needs to be a number:")
             self.displayOptions()
