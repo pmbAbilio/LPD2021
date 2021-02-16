@@ -11,15 +11,26 @@ class DataBaseFiles():
 
         sql_create_log_data_table = """ CREATE TABLE IF NOT EXISTS logdata (
                                         id integer PRIMARY KEY,
+                                        logname text,
                                         ip text NOT NULL,
                                         timestamp text,
                                         message text
+                                    ); """
+
+        sql_create_ip_data_table = """ CREATE TABLE IF NOT EXISTS ipdata (
+                                        id integer PRIMARY KEY,
+                                        ip text NOT NULL,
+                                        starttimestamp text,
+                                        finishtimestamp text,
+                                        location text,
+                                        attemps integer
                                     ); """
 
         # create tables
         if conn is not None:
             # create projects table
             DataBaseFiles.create_table(conn, sql_create_log_data_table)
+            DataBaseFiles.create_table(conn, sql_create_ip_data_table)
             return conn
         else:
             print("Error! cannot create the database connection.")
@@ -52,7 +63,15 @@ class DataBaseFiles():
     @staticmethod
     def insertdata(conn, data):
         #data = ('ip','timestamp', 'message')
-        sql = ''' INSERT INTO logdata (ip,timestamp,message) VALUES (?,?,?);'''
+        sql = ''' INSERT INTO logdata (logname,ip,timestamp,message) VALUES (?,?,?,?);'''
+        cur = conn.cursor()
+        cur.execute(sql, data)
+        conn.commit()
+
+        return cur.lastrowid
+    @staticmethod
+    def insertipdata(conn, data):
+        sql = ''' INSERT INTO ipdata (ip,starttimestamp, finishtimestamp,location, attempts) VALUES (?,?,?,?,?);'''
         cur = conn.cursor()
         cur.execute(sql, data)
         conn.commit()

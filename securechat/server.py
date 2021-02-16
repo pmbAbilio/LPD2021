@@ -1,5 +1,7 @@
 import socket
 import select
+import os
+import time
 
 class server():
     HEADER_LENGTH = 10
@@ -118,7 +120,6 @@ class server():
                         # If False, client disconnected, cleanup
                         if message is False:
                             print('Closed connection from: {}'.format(self.clients[notified_socket]['username']))
-                            #.decode('utf-8')
                             # Remove from list for socket.socket()
                             sockets_list.remove(notified_socket)
 
@@ -129,9 +130,21 @@ class server():
 
                         # Get user by notified socket, so we will know who sent the message
                         user = self.clients[notified_socket]
-                        #print(user['key'])
-                        #print(f'Received message from {user["username"]}: {message["data"].decode("utf-8")}')
+                        
+                        print(os.path.exists(user["username"]))
+                        try:
+                            os.mkdir(user["username"])
+                        except OSError:
+                            if os.path.exists(user["username"]): print("The directory {} already exists so we will use that one".format(user["username"]))
+                            else: print ("Creation of the directory %s failed" % user["username"])
+                        else:
+                            print ("Successfully created the directory %s " % user["username"])
+                        
+                        messages = open(user["username"]+'/'+str(time.time())+'.msg', 'wb')
+                        messages.write(message["data"])
+                        messages.close()
 
+                        #print(f'Received message from {user["username"]}: {message["data"].decode("utf-8")}')
                         # Iterate over connected self.clients and broadcast message
                         for client_socket in self.clients:
 

@@ -1,7 +1,7 @@
 import socket, subprocess,sys
 from securechat.server import server
 from securechat.client import client
-
+from securechat.crypto_utils import crypto_utils
 
 class SecureChat():
 
@@ -10,7 +10,9 @@ class SecureChat():
 
     def displayOptions(self):
         try:
-            inpt = int(input("What type of instance do you wish to start(select 1 for server / 2 for client): "))
+            print("What type of instance do you wish to start(select 1 for server / 2 for client) ")
+            print("3 - View message file")
+            inpt = int(input("Select a suitable option: "))
         except ValueError:
             print("It needs to be a number:")
             self.displayOptions()
@@ -19,6 +21,7 @@ class SecureChat():
             self.displayOptions()
         if inpt == 1: self.startServer()
         elif inpt == 2: self.startClient()
+        elif inpt == 3: crypto_utils().decrypt_messages_file()
         else: sys.exit()
         
 

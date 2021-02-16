@@ -70,8 +70,6 @@ class client():
                         sys.exit()
                     message_length = int(message_header.decode('utf-8').strip())
                     message = client_socket.recv(message_length)
-                    print("RECEIVED:")
-                    print(message)
                     try:
                         message = message.decode('utf-8')
                     except:
