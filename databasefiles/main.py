@@ -9,28 +9,41 @@ class DataBaseFiles():
     def createdatabase():
         conn = DataBaseFiles.create_connection('data.db')
 
-        sql_create_log_data_table = """ CREATE TABLE IF NOT EXISTS logdata (
+        sql_create_ufw_data_table = """ CREATE TABLE IF NOT EXISTS ufwdata (
                                         id integer PRIMARY KEY,
-                                        logname text,
                                         ip text NOT NULL,
-                                        timestamp text,
+                                        date DATE NOT NULL,
                                         message text
                                     ); """
 
-        sql_create_ip_data_table = """ CREATE TABLE IF NOT EXISTS ipdata (
+        sql_create_ssh_data_table = """ CREATE TABLE IF NOT EXISTS sshdata (
                                         id integer PRIMARY KEY,
                                         ip text NOT NULL,
-                                        starttimestamp text,
-                                        finishtimestamp text,
-                                        location text,
-                                        attemps integer
+                                        date DATE NOT NULL,
+                                        user text,
+                                        message text
                                     ); """
 
+        sql_create_apache_data_table = """ CREATE TABLE IF NOT EXISTS apachedata (
+                                        id integer PRIMARY KEY,
+                                        ip text NOT NULL,
+                                        date DATE NOT NULL,
+                                        url text,
+                                        resultcode text
+                                    ); """
+
+        sql_create_analisys_data_table = """ CREATE TABLE IF NOT EXISTS analisysdata (
+                                        id integer PRIMARY KEY,
+                                        date DATE NOT NULL
+                                    ); """
+        
         # create tables
         if conn is not None:
             # create projects table
-            DataBaseFiles.create_table(conn, sql_create_log_data_table)
-            DataBaseFiles.create_table(conn, sql_create_ip_data_table)
+            DataBaseFiles.create_table(conn, sql_create_ufw_data_table)
+            DataBaseFiles.create_table(conn, sql_create_ssh_data_table)
+            DataBaseFiles.create_table(conn, sql_create_apache_data_table)
+            DataBaseFiles.create_table(conn, sql_create_analisys_data_table)
             return conn
         else:
             print("Error! cannot create the database connection.")
@@ -61,17 +74,16 @@ class DataBaseFiles():
             print(e)
 
     @staticmethod
-    def insertdata(conn, data):
-        #data = ('ip','timestamp', 'message')
-        sql = ''' INSERT INTO logdata (logname,ip,timestamp,message) VALUES (?,?,?,?);'''
+    def insertufwdata(conn, data):
+        sql = '''INSERT INTO ufwdata (ip, date, message ) VALUES (?,?,?);'''
         cur = conn.cursor()
         cur.execute(sql, data)
         conn.commit()
 
         return cur.lastrowid
     @staticmethod
-    def insertipdata(conn, data):
-        sql = ''' INSERT INTO ipdata (ip,starttimestamp, finishtimestamp,location, attempts) VALUES (?,?,?,?,?);'''
+    def insertsshdata(conn, data):
+        sql = ''' INSERT INTO sshdata (ip,date, user, message) VALUES (?,?,?,?);'''
         cur = conn.cursor()
         cur.execute(sql, data)
         conn.commit()
@@ -79,7 +91,25 @@ class DataBaseFiles():
         return cur.lastrowid
 
     @staticmethod
-    def selectdata(self, conn, filter):
+    def insertapachedata(conn, data):
+        sql = ''' INSERT INTO apachedata (ip,date, url, resultcode) VALUES (?,?,?,?);'''
+        cur = conn.cursor()
+        cur.execute(sql, data)
+        conn.commit()
+
+        return cur.lastrowid
+    
+    @staticmethod
+    def insertanalisysdata(conn, data):
+        sql = ''' INSERT INTO analisysdata (date) VALUES (?,?,?,?);'''
+        cur = conn.cursor()
+        cur.execute(sql, data)
+        conn.commit()
+
+        return cur.lastrowid
+
+    @staticmethod
+    def selectdata( conn, filter):
         if filter['atribute'] == 1:
             sql = "SELECT * FROM "+ filter['table']
             cur = conn.cursor()

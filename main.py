@@ -2,29 +2,23 @@ from portscanner.main import PortScanner
 from securechat.main import SecureChat
 from databasefiles.main import DataBaseFiles
 from logparser.main import LogParser
-'''
-options ={
-  "Exit": "Exits the program",
-  "Port Scan" : "This option makes a port scan to a remote host, allowing the specification of either scanning all ports or the most common",
-  "List On Going Connections" : "Lists all the machine current connections",
-  "Safe Chat(Server/Client)" : "Creates a secure chat while being able to be set as a client or server",
-  "Parse log file and generate report" : "Reads a log file and shows all the usefull information on a report or csv file"
-}
+from servicescanner.main import servicescanner
+import subprocess
 
-'''
 options = ["Exit", "Port Scan", "List On Going Connections", "Secure Chat","Parse log file and generate report"]
 
 class menu():
     conn = None
 
     def __init__(self):
+
+        subprocess.call('clear',shell=True)
         print("Security Solution")
         self.conn = DataBaseFiles.createdatabase()
         self.listOptions()
         self.awaitInput()
     
     def listOptions(self):
-        print(options)
         for index,opt in enumerate(options):
             print("{} --- {}".format(index, opt))
     
@@ -44,12 +38,26 @@ class menu():
         elif inpt == 1:
             print("Port Scan...")
             ip = input("Remote System IP: ")
-            scanner = PortScanner(ip) 
+            try:
+                scanner = PortScanner(ip) 
+            except NameError:
+                self.__init__()
+        elif inpt == 2:
+            try:
+                servicescanner()
+            except NameError:
+                self.__init__()
         elif inpt == 3:
             print("Openning chat application...")
-            chat = SecureChat()
+            try:
+                chat = SecureChat()
+            except NameError:
+                self.__init__()
         elif inpt == 4:
-            LogParser(self.conn)
+            try:
+                LogParser(self.conn)
+            except NameError:
+                self.__init__()
 
 
 
